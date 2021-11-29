@@ -39,7 +39,7 @@ def order_finding(a, n):
     return cirq.Circuit(cirq.H.on_each(*exponent),
                         ModularExp(target, exponent, a, n),
                         cirq.measure(*target),
-                        quantum_fourier_transform.qft_dagger(*exponent),
+                        cirq.inverse(quantum_fourier_transform.qft(*exponent)),
                         cirq.measure(*exponent, key="result"))
 
 

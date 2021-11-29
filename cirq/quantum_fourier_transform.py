@@ -35,28 +35,14 @@ def qft(*qubits, swap=True):
         yield from _swap(qubits)
 
 
-def qft_dagger(*qubits, swap=True):
-    """ Performs the inverse Quantum Fourier Transform (QFT†) """
-
-    if swap:
-        yield from _swap(qubits)
-    # 01 02 03 04 12 13 14 23 24 34
-    for i in range(len(qubits) - 1, 0, -1):
-        for j in range(len(qubits) - 1, i, -1):
-            yield _cphase(qubits, i, j, -1)
-        yield cirq.H(qubits[i])
-
-
 def main():
     qubits = cirq.LineQubit.range(_NUM_QUBITS)
     my_qft = cirq.Circuit(_initial_state(), qft(*qubits))
 
     cirq_qft = cirq.Circuit(_initial_state(), cirq.qft(*qubits))
 
-    simulator = cirq.Simulator()
-
-    my_qft_result = simulator.simulate(my_qft)
-    cirq_qft_result = simulator.simulate(cirq_qft)
+    my_qft_result = cirq.Simulator().simulate(my_qft)
+    cirq_qft_result = cirq.Simulator().simulate(cirq_qft)
 
     print("my qft:", my_qft_result)
     print()
