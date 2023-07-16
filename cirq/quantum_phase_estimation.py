@@ -7,12 +7,16 @@ import numpy as np
 import quantum_fourier_transform
 
 
-def _eigenvalue(theta):
+def eigenvalue(theta):
     return math.e**(((2 * math.pi) * theta) * 1j)
 
 
+def unitary(theta):
+    return np.matrix([[1, 0], [0, eigenvalue(_THETA)]])
+
+
 _THETA = 1 / 3
-_U = np.matrix([[1, 0], [0, _eigenvalue(_THETA)]])
+_U = unitary(_THETA)
 
 
 class _UnknownGate(cirq.Gate):
@@ -34,7 +38,7 @@ class _UnknownGate(cirq.Gate):
         return _UnknownGate(self.u**power, power)
 
 
-def qpe(psi, num_counting_qubits, unknown_gate):
+def qpe_fourier_basis(psi, num_counting_qubits, unknown_gate):
     counting_qubits = cirq.LineQubit.range(num_counting_qubits)
 
     yield cirq.H.on_each(*counting_qubits)
@@ -43,6 +47,12 @@ def qpe(psi, num_counting_qubits, unknown_gate):
     for qubit in counting_qubits:
         yield (unknown_gate**power)(*psi).controlled_by(qubit)
         power *= 2
+
+
+def qpe(psi, num_counting_qubits, unknown_gate):
+    yield from qpe_fourier_basis(psi, num_counting_qubits, unknown_gate)
+
+    counting_qubits = cirq.LineQubit.range(num_counting_qubits)
 
     yield cirq.inverse(
         quantum_fourier_transform.qft(*counting_qubits, swap=False))
